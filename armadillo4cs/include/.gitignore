@@ -1,0 +1,15 @@
+*.dll
+*.gz
+*.lib
+*.zip
+OpenBLAS */
+*.xz
+*.dll.a
+
+# *.c
+# *.hpp
+*.f
+*.dat
+*.txt
+*.S
+# *.h
