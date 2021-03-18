@@ -1158,6 +1158,12 @@ namespace DotNumerics.LinearAlgebra
         {
             try
             {
+                if (fileName.Contains("/") || fileName.Contains("\\"))
+                    try
+                    {
+                        Directory.CreateDirectory(Path.GetDirectoryName(fileName));
+                    }
+                    catch { }
                 using (var A = new System.IO.StreamWriter(fileName, append))
                 {
                     if (varName != null)
@@ -1197,6 +1203,12 @@ namespace DotNumerics.LinearAlgebra
         }
         public void Export(string fileName, string format = "")
         {
+            if (fileName.Contains("/") || fileName.Contains("\\"))
+                try
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(fileName));
+                }
+                catch { }
             var sep = Type == VectorType.Column ? "\r\n" : "\t";
             using (var f = new StreamWriter(fileName))
             {
