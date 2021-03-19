@@ -13,6 +13,7 @@ using System.ComponentModel;
 using DotNumerics.LinearAlgebra.CSLapack;
 using DotNumerics.LinearAlgebra.CSEispack;
 using DotNumerics.FortranLibrary;
+using System.Linq;
 
 namespace DotNumerics.LinearAlgebra
 {
@@ -1453,15 +1454,80 @@ namespace DotNumerics.LinearAlgebra
             }
             ComplexMatrix Vec;
             var vals = ARMADILO.eig_pair(K, M, out Vec);
-            if (sort)
-                SortFrequencyStateSpace(ref vals, ref Vec, -1);
             if (massNormalize || normalize)
                 Normalize(Vec, M, massNormalize, normalize);
+            if (sort)
+            {
+                //SortFrequencyStateSpace(ref vals, ref Vec, -1);
+
+                for (int i = 0; i < vals.Count; i++)
+                {
+                    for (int j = i + 1; j < vals.Count; j++)
+                        if (Vec.GetColumnVector(i).MaxAbs(0, 2 * rows) < Vec.GetColumnVector(j).MaxAbs(0, 2 * rows))
+                        {
+                            vals.Swap(i, j);
+                            Vec.SwapColumns(i, j);
+                        }
+                }
+            }
+            else
+                rows = -1;
             if (num > vals.Count) num = vals.Count;
             EigenVec = Vec[0, 0, rows, num];
             vals = vals[0, num];
             return vals;
         }
+
+        public static void SortByTracking(
+           List<double> x_axis,
+           List<ComplexVector> values,
+           List<ComplexMatrix> vectors = null,
+           int reference = 0)
+        {
+            if (values.Count <= 1) return;
+            var n = values[0].Count;
+            for (int i = reference + 1; i < values.Count; i++)
+            {
+                var v_ref = values[reference];
+                if (i - reference > 1)
+                {
+                    var v1 = values[i - 2];
+                    var v2 = values[i - 1];
+                    var x1 = x_axis[i - 2];
+                    var x2 = x_axis[i - 1];
+                    var x3 = x_axis[i];
+                    v_ref = v2 + (v2 - v1) * ((x3 - x2) / (x2 - x1));
+                }
+                for (var j = 0; j < n; j++)
+                {
+                    var k = (values[i] - v_ref[j]).MinAbsIndex();
+                    values[i].Swap(k, j);
+                    if (vectors != null)
+                        vectors[i].SwapColumns(k, j);
+                }
+            }
+            for (int i = reference - 1; i >= 0; i--)
+            {
+                var v_ref = values[reference];
+                if (reference - i > 1)
+                {
+                    var v1 = values[i + 2];
+                    var v2 = values[i + 1];
+                    var x1 = x_axis[i + 2];
+                    var x2 = x_axis[i + 1];
+                    var x3 = x_axis[i];
+                    v_ref = v2 + (v2 - v1) * ((x3 - x2) / (x2 - x1));
+                }
+                for (var j = 0; j < n; j++)
+                {
+                    var k = (values[i] - v_ref[j]).MinAbsIndex();
+                    values[i].Swap(k, j);
+                    if (vectors != null)
+                        vectors[i].SwapColumns(k, j);
+                }
+            }
+        }
+
 
         #endregion
 

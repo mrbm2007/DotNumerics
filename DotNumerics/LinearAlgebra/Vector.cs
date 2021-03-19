@@ -1280,6 +1280,10 @@ namespace DotNumerics.LinearAlgebra
         {
             return ABSMax();
         }
+        /// <summary>
+        /// same as AbsMax
+        /// </summary>
+        /// <returns></returns>
         public double ABSMax()
         {
             if (Count == 0)
@@ -1324,6 +1328,69 @@ namespace DotNumerics.LinearAlgebra
                 foreach (var d in Data)
                     min = Math.Min(min, d);
             return min;
+        }
+
+
+        public int MinAbsIndex(int start = 0, int end = -1)
+        {
+            var min = double.MaxValue;
+            var ind = 0;
+            if (end == -1) end = Count;
+            for (int i = start; i < end; i++)
+            {
+                if (min > Math.Abs(this[i]))
+                {
+                    min = Math.Abs(this[i]);
+                    ind = i;
+                }
+            }
+            return ind;
+        }
+        public int MaxAbsIndex(int start = 0, int end = -1)
+        {
+            var max = 0.0;
+            var ind = 0;
+            if (end == -1) end = Count;
+            for (int i = start; i < end; i++)
+            {
+                if (max < Math.Abs(this[i]))
+                {
+                    max = Math.Abs(this[i]);
+                    ind = i;
+                }
+            }
+            return ind;
+        }
+
+        public int MinIndex(int start = 0, int end = -1)
+        {
+            var min = double.MaxValue;
+            var ind = 0;
+            if (end == -1) end = Count;
+            for (int i = start; i < end; i++)
+            {
+                if (min > this[i])
+                {
+                    min = this[i];
+                    ind = i;
+                }
+            }
+            return ind;
+        }
+        public int MaxIndex(int start = 0, int end = -1)
+        {
+            var max = double.MinValue;
+            var ind = 0;
+            if (end == -1) end = Count;
+            for (int i = start; i < end; i++)
+            {
+                if (max < this[i])
+                {
+                    max = this[i];
+                    ind = i;
+                }
+            }
+            return ind;
         }
 
         public Vector Abs()

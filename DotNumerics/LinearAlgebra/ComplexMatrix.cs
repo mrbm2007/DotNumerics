@@ -613,7 +613,7 @@ namespace DotNumerics.LinearAlgebra
                 this._RowCount = newRowCount;
                 this._ColumnCount = newColumnCount;
 
-                System.Threading.Tasks.Parallel.For(0, Math.Min(tmp.RowCount, this.RowCount), i =>
+                Parallel.For(0, Math.Min(tmp.RowCount, this.RowCount), i =>
                 {
                     for (int j = 0; j < Math.Min(tmp.ColumnCount, this.ColumnCount); j++)
                         this[i, j] = tmp[i, j];
@@ -644,7 +644,7 @@ namespace DotNumerics.LinearAlgebra
                         Directory.CreateDirectory(Path.GetDirectoryName(fileName));
                     }
                     catch { }
-                var A = new System.IO.StreamWriter(fileName, append);
+                var A = new StreamWriter(fileName, append);
                 if (varName != null)
                     A.Write(varName + "=[");
                 for (int i = 0; i < this.RowCount; i++)
@@ -690,9 +690,9 @@ namespace DotNumerics.LinearAlgebra
                     }
                     A.Close();
                 }
-                if (SaveLayout && (OverrideLayout || !System.IO.File.Exists(System.IO.Path.ChangeExtension(fileName, "lay"))))
+                if (SaveLayout && (OverrideLayout || !File.Exists(Path.ChangeExtension(fileName, "lay"))))
                 {
-                    var fileName_ = System.IO.Path.GetFileName(fileName);
+                    var fileName_ = Path.GetFileName(fileName);
                     #region Layout String
                     var layout_str = @"#!MC 1200
 $!VarSet |LFDSFN1| = '" + fileName_ + @"'
@@ -789,7 +789,7 @@ $!FRAMECONTROL ACTIVATEBYNUMBER
   FRAME = 1
 $!SETSTYLEBASE CONFIG";
                     #endregion
-                    using (var A = new System.IO.StreamWriter(System.IO.Path.ChangeExtension(fileName, "lay")))
+                    using (var A = new StreamWriter(Path.ChangeExtension(fileName, "lay")))
                     {
                         A.WriteLine(layout_str);
                         A.Close();
@@ -839,6 +839,27 @@ $!SETSTYLEBASE CONFIG";
             }
 
             return rowVects;
+        }
+
+        /// <summary>
+        /// Added By MRB
+        /// </summary>
+        /// <param name="row_index"></param>
+        /// <param name="row"></param>
+        public void SetRow(int row_index, ComplexVector row)
+        {
+            for (int i = 0; i < Math.Max(ColumnCount, row.Count); i++)
+                this[row_index, i] = row[i];
+        }
+        /// <summary>
+        /// Added By MRB
+        /// </summary>
+        /// <param name="col_index"></param>
+        /// <param name="column"></param>
+        public void SetColumn(int col_index, ComplexVector column)
+        {
+            for (int i = 0; i < Math.Max(RowCount, column.Count); i++)
+                this[i, col_index] = column[i];
         }
 
         /// <summary>
@@ -1167,6 +1188,14 @@ $!SETSTYLEBASE CONFIG";
             }
             return C;
         }
+        /// <summary>complex-Matrix multiplication.</summary>
+        /// <param name="c"> The left side scalar of the multiplication operator.</param>
+        /// <param name="B">The right side matrix of the multiplication operator.</param>
+        /// <returns>A matrix that represents the result of the multiplication.</returns>
+        public static ComplexMatrix operator *(ComplexMatrix B, Complex c)
+        {
+            return c * B;
+        }
 
         public static ComplexVector operator *(ComplexMatrix A, Vector b)
         {
@@ -1280,7 +1309,7 @@ $!SETSTYLEBASE CONFIG";
             var C = new ComplexMatrix(this._RowCount, this._ColumnCount);
             var dataC = C.Data;
 
-            System.Threading.Tasks.Parallel.For(0, this._Data.Length, i =>
+            Parallel.For(0, this._Data.Length, i =>
             {
                 dataC[i] = -this._Data[i];
             });
@@ -1428,8 +1457,9 @@ $!SETSTYLEBASE CONFIG";
 
         #endregion
 
-        internal void SwapColumns(int i, int j)
+        public void SwapColumns(int i, int j)
         {
+            if (i == j) return;
             var i1 = _RowCount * i;
             var j1 = _RowCount * j;
             for (int c = 0; c < _RowCount; c++)
