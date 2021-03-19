@@ -316,6 +316,26 @@ namespace DotNumerics.LinearAlgebra
 
             return r;
         }
+        public static ComplexVector operator -(ComplexVector A, Complex b)
+        {
+            ComplexVector r = new ComplexVector(A.Type, A.Count);
+            Complex[] rData = r.Data;
+            for (int i = 0; i < rData.Length; i++)
+                rData[i] = A.Data[i] - b;
+            return r;
+        }
+        public static ComplexVector operator +(ComplexVector A, Complex b)
+        {
+            ComplexVector r = new ComplexVector(A.Type, A.Count);
+            Complex[] rData = r.Data;
+            for (int i = 0; i < rData.Length; i++)
+                rData[i] = A.Data[i] + b;
+            return r;
+        }
+        public static ComplexVector operator +(Complex b, ComplexVector A)
+        {
+            return A + b;
+        }
 
         /// <summary>
         /// Scalar-Vector multiplication.
@@ -906,6 +926,12 @@ namespace DotNumerics.LinearAlgebra
         {
             try
             {
+                if (fileName.Contains("/") || fileName.Contains("\\"))
+                    try
+                    {
+                        Directory.CreateDirectory(Path.GetDirectoryName(fileName));
+                    }
+                    catch { }
                 using (var A = new System.IO.StreamWriter(fileName, append))
                 {
                     if (varName != null)
@@ -1013,7 +1039,7 @@ namespace DotNumerics.LinearAlgebra
         /// Returns the equivalent string representation of the vector.
         /// </summary>
         /// <returns>The string representation of the vector.</returns>
-        public string VectorToString(string format="")
+        public string VectorToString(string format = "")
         {
             using (StringWriter writer = new StringWriter())
             {
@@ -1042,9 +1068,57 @@ namespace DotNumerics.LinearAlgebra
 
         #endregion
 
-
-        internal void Swap(int i, int j)
+        public double MaxAbs(int start = 0, int end = -1)
         {
+            var max = 0.0;
+            if (end == -1) end = Count;
+            for (int i = start; i < end; i++)
+                max = Math.Max(max, this[i].Modulus);
+            return max;
+        }
+        public double MinAbs(int start = 0, int end = -1)
+        {
+            var min = double.MaxValue;
+            if (end == -1) end = Count;
+            for (int i = start; i < end; i++)
+                min = Math.Min(min, this[i].Modulus);
+            return min;
+        }
+
+        public int MinAbsIndex(int start = 0, int end = -1)
+        {
+            var min = double.MaxValue;
+            var ind = 0;
+            if (end == -1) end = Count;
+            for (int i = start; i < end; i++)
+            {
+                if (min > this[i].Modulus)
+                {
+                    min = this[i].Modulus;
+                    ind = i;
+                }
+            }
+            return ind;
+        }
+        public int MaxAbsIndex(int start = 0, int end = -1)
+        {
+            var max = 0.0;
+            var ind = 0;
+            if (end == -1) end = Count;
+            for (int i = start; i < end; i++)
+            {
+                if (max < this[i].Modulus)
+                {
+                    max = this[i].Modulus;
+                    ind = i;
+                }
+            }
+            return ind;
+        }
+
+        public void Swap(int i, int j)
+        {
+            if (i == j) return;
             var tmp = this[i];
             this[i] = this[j];
             this[j] = tmp;
