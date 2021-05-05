@@ -866,7 +866,7 @@ namespace DotNumerics.LinearAlgebra
         }
         static bool MustSwap(Complex a, Complex b, bool ascending, SortMode sortMode)
         {
-            if (sortMode == SortMode.Modulus_then_neg_imag || sortMode == SortMode.Modulus)
+            if (sortMode == SortMode.Modulus_then_neg_imag)
             {
                 if (ascending)
                 {
